@@ -1,0 +1,25 @@
+---
+- name: Configure web service
+  hosts: nodes
+  tasks:
+    - name: install Apache
+      yum:
+        name: httpd
+    - name: copy index.html
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+        mode: 0644
+      notify:
+        - restart_web
+    - name: open web port on firewall
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+  handlers:
+    - name: restart_web
+      service:
+        name: httpd
+        state: restarted

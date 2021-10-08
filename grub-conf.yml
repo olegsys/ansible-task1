@@ -1,0 +1,24 @@
+---
+- name: Configure grub
+  hosts: nodes
+  gather_facts: no
+  tasks:
+    - name: set ifnames
+      lineinfile:
+        path: /etc/default/grub
+        backrefs: yes
+        regexp: '^(GRUB_CMDLINE_LINUX=(?!.* net.ifnames)\"[^\"]+)(\".*)'
+        line: '\1 net.ifnames=0\2'
+        state: present
+      notify: Rebuild_grub
+    - name: set biosdevname
+      lineinfile:
+        path: /etc/default/grub
+        backrefs: yes
+        regexp: '^(GRUB_CMDLINE_LINUX=(?!.* biosdevname)\"[^\"]+)(\".*)'
+        line: '\1 biosdevname=0\2'
+        state: present
+      notify: Rebuild_grub
+  handlers:
+    - name: Rebuild_grub
+      shell: grub2-mkconfig -o ~/grub.cfg
